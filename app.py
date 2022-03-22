@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, request
+from flask import render_template, request, url_for
 from datetime import datetime
 
 
@@ -8,11 +8,20 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET','POST'])
 def index():
+    all_movies = Movies.query.all()
+    return render_template('index.html', all_movies=all_movies)
+
     return render_template('index.html')
 
 
-@app.route('/date', methods=['POST'])
+@app.route('/date', methods=['GET', 'POST'])
 def date():
+    form = MoviesForm()
+    if form.validate_on_submit():
+        new_movie = Movies(name=form.name.data)
+        db.session.add(new_movie)
+        db.session.commit()
+        return redirect(url_for('index'))
     birthYear = request.form["year"]
     birthMonth = request.form["month"]
     birthDays = request.form["day"]
